@@ -6,13 +6,13 @@ import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as cTab;
 import 'package:url_launcher/url_launcher.dart';
 
 class HtmlView extends StatelessWidget {
-  final String data;
-  final Function onLaunchFail;
+  final String? data;
+  final Function? onLaunchFail;
   final bool scrollable;
-  final EdgeInsets padding;
-  Map<String, String> stylingOptions;
-  BuildContext ctx;
-  MarkdownStyleSheet styleSheet;
+  final EdgeInsets? padding;
+  Map<String, String>? stylingOptions;
+  BuildContext? ctx;
+  MarkdownStyleSheet? styleSheet;
 
   /// If [scrollable] is set to false then you must handle scrolling outside of this widget.
   /// This can be acheived by using a [SingleChildScrollView].
@@ -22,22 +22,22 @@ class HtmlView extends StatelessWidget {
       this.onLaunchFail,
       this.scrollable = true,
       this.padding,
-      this.styleSheet = null});
+      this.styleSheet});
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
     if (scrollable) {
       return Markdown(
-        data: _htmlMd(data, stylingOptions),
-        onTapLink: (url) {
-          if (url.startsWith("http://") || url.startsWith("https://")) {
+        data: _htmlMd(data!, stylingOptions!),
+        onTapLink: (text, url, title) {
+          if (url!.startsWith("http://") || url!.startsWith("https://")) {
             _launchURL(url);
           } else {
             _launchOtherURL(url);
           }
         },
-        padding: padding,
+        padding: padding!,
         styleSheet: styleSheet,
       );
     } else {
@@ -45,10 +45,10 @@ class HtmlView extends StatelessWidget {
         padding: padding,
         child: MarkdownBody(
           // Doesn't use a list view, hence no scrolling.
-          data: _htmlMd(data, stylingOptions),
-          onTapLink: (url) {
-            if (url.startsWith("http://") || url.startsWith("https://")) {
-              _launchURL(url);
+          data: _htmlMd(data!, stylingOptions!),
+          onTapLink: (text, url, title) {
+            if (url!.startsWith("http://") || url!.startsWith("https://")) {
+              _launchURL(url!);
             } else {
               _launchOtherURL(url);
             }
@@ -71,8 +71,8 @@ class HtmlView extends StatelessWidget {
     try {
       await cTab.launch(
         url,
-        option: new cTab.CustomTabsOption(
-          toolbarColor: Theme.of(ctx).primaryColor,
+        customTabsOption: new cTab.CustomTabsOption(
+          toolbarColor: Theme.of(ctx!).primaryColor,
           enableDefaultShare: true,
           enableUrlBarHiding: true,
           showPageTitle: true,
@@ -80,7 +80,7 @@ class HtmlView extends StatelessWidget {
       );
     } catch (e) {
       if (this.onLaunchFail != null) {
-        this.onLaunchFail(url);
+        this.onLaunchFail!(url);
       }
       debugPrint(e.toString());
     }
@@ -92,7 +92,7 @@ class HtmlView extends StatelessWidget {
     } else {
       debugPrint('Could not launch $url');
       if (this.onLaunchFail != null) {
-        this.onLaunchFail(url);
+        this.onLaunchFail!(url);
       }
     }
   }

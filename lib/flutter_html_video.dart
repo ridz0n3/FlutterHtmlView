@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayPause extends StatefulWidget {
-  final VideoPlayerController controller;
+  final VideoPlayerController? controller;
 
   VideoPlayPause(this.controller);
 
@@ -15,7 +15,7 @@ class VideoPlayPause extends StatefulWidget {
 class _VideoPlayPauseState extends State<VideoPlayPause> {
   FadeAnimation imageFadeAnim =
       new FadeAnimation(child: const Icon(Icons.play_arrow, size: 100.0));
-  VoidCallback listener;
+  late VoidCallback listener;
 
   _VideoPlayPauseState() {
     listener = () {
@@ -23,20 +23,20 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
     };
   }
 
-  VideoPlayerController get controller => widget.controller;
+  VideoPlayerController? get controller => widget.controller;
 
   @override
   void initState() {
     super.initState();
-    controller.addListener(listener);
-    controller.setVolume(1.0);
-    controller.play();
+    controller!.addListener(listener);
+    controller!.setVolume(1.0);
+    controller!.play();
   }
 
   @override
   void deactivate() {
-    controller.setVolume(0.0);
-    controller.removeListener(listener);
+    controller!.setVolume(0.0);
+    controller!.removeListener(listener);
     super.deactivate();
   }
 
@@ -44,26 +44,26 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[
       new GestureDetector(
-        child: new VideoPlayer(controller),
+        child: new VideoPlayer(controller!),
         onTap: () {
-          if (!controller.value.initialized) {
+          if (!controller!.value.initialized) {
             return;
           }
-          if (controller.value.isPlaying) {
+          if (controller!.value.isPlaying) {
             imageFadeAnim =
                 new FadeAnimation(child: const Icon(Icons.pause, size: 100.0));
-            controller.pause();
+            controller!.pause();
           } else {
             imageFadeAnim = new FadeAnimation(
                 child: const Icon(Icons.play_arrow, size: 100.0));
-            controller.play();
+            controller!.play();
           }
         },
       ),
       new Align(
         alignment: Alignment.bottomCenter,
         child: new VideoProgressIndicator(
-          controller,
+          controller!,
           allowScrubbing: true,
         ),
       ),
@@ -77,7 +77,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 }
 
 class FadeAnimation extends StatefulWidget {
-  final Widget child;
+  final Widget? child;
   final Duration duration;
 
   FadeAnimation({this.child, this.duration: const Duration(milliseconds: 500)});
@@ -88,7 +88,7 @@ class FadeAnimation extends StatefulWidget {
 
 class _FadeAnimationState extends State<FadeAnimation>
     with SingleTickerProviderStateMixin {
-  AnimationController animationController;
+  late AnimationController animationController;
 
   @override
   void initState() {
@@ -135,11 +135,11 @@ class _FadeAnimationState extends State<FadeAnimation>
 }
 
 typedef Widget VideoWidgetBuilder(
-    BuildContext context, VideoPlayerController controller);
+    BuildContext context, VideoPlayerController? controller);
 
 abstract class PlayerLifeCycle extends StatefulWidget {
   final VideoWidgetBuilder childBuilder;
-  final String dataSource;
+  final String? dataSource;
 
   PlayerLifeCycle(this.dataSource, this.childBuilder);
 }
@@ -147,7 +147,7 @@ abstract class PlayerLifeCycle extends StatefulWidget {
 /// A widget connecting its life cycle to a [VideoPlayerController] using
 /// a data source from the network.
 class NetworkPlayerLifeCycle extends PlayerLifeCycle {
-  NetworkPlayerLifeCycle(String dataSource, VideoWidgetBuilder childBuilder)
+  NetworkPlayerLifeCycle(String? dataSource, VideoWidgetBuilder childBuilder)
       : super(dataSource, childBuilder);
 
   @override
@@ -156,7 +156,7 @@ class NetworkPlayerLifeCycle extends PlayerLifeCycle {
 }
 
 abstract class _PlayerLifeCycleState extends State<PlayerLifeCycle> {
-  VideoPlayerController controller;
+  VideoPlayerController? controller;
 
   @override
 
@@ -165,14 +165,14 @@ abstract class _PlayerLifeCycleState extends State<PlayerLifeCycle> {
   void initState() {
     super.initState();
     controller = createVideoPlayerController();
-    controller.addListener(() {
-      if (controller.value.hasError) {
-        print(controller.value.errorDescription);
+    controller!.addListener(() {
+      if (controller!.value.hasError) {
+        print(controller!.value.errorDescription);
       }
     });
-    controller.initialize();
-    controller.setLooping(false);
-    controller.play();
+    controller!.initialize();
+    controller!.setLooping(false);
+    controller!.play();
   }
 
   @override
@@ -182,7 +182,7 @@ abstract class _PlayerLifeCycleState extends State<PlayerLifeCycle> {
 
   @override
   void dispose() {
-    controller.dispose();
+    controller!.dispose();
     super.dispose();
   }
 
@@ -197,12 +197,12 @@ abstract class _PlayerLifeCycleState extends State<PlayerLifeCycle> {
 class _NetworkPlayerLifeCycleState extends _PlayerLifeCycleState {
   @override
   VideoPlayerController createVideoPlayerController() {
-    return new VideoPlayerController.network(widget.dataSource);
+    return new VideoPlayerController.network(widget.dataSource!);
   }
 }
 
 class AspectRatioVideo extends StatefulWidget {
-  final VideoPlayerController controller;
+  final VideoPlayerController? controller;
 
   AspectRatioVideo(this.controller);
 
@@ -211,10 +211,10 @@ class AspectRatioVideo extends StatefulWidget {
 }
 
 class AspectRatioVideoState extends State<AspectRatioVideo> {
-  VideoPlayerController get controller => widget.controller;
+  VideoPlayerController? get controller => widget.controller;
   bool initialized = false;
 
-  VoidCallback listener;
+  late VoidCallback listener;
 
   @override
   void initState() {
@@ -223,12 +223,12 @@ class AspectRatioVideoState extends State<AspectRatioVideo> {
       if (!mounted) {
         return;
       }
-      if (initialized != controller.value.initialized) {
-        initialized = controller.value.initialized;
+      if (initialized != controller!.value.initialized) {
+        initialized = controller!.value.initialized;
         setState(() {});
       }
     };
-    controller.addListener(listener);
+    controller!.addListener(listener);
   }
 
   @override

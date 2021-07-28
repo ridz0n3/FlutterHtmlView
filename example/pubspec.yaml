@@ -1,6 +1,7 @@
 name: flutter_html_view_example
 description: Demonstrates how to use the flutter_html_textview plugin.
-
+environment:
+  sdk: ">=2.11.0 <3.0.0"
 dependencies:
   flutter:
     sdk: flutter

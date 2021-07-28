@@ -4,13 +4,13 @@ import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as cTab;
 import 'package:url_launcher/url_launcher.dart';
 
 class HtmlText extends StatelessWidget {
-  final String data;
-  final TextOverflow overflow;
-  final Widget style;
-  final int maxLines;
-  final Function onLaunchFail;
+  final String? data;
+  final TextOverflow? overflow;
+  final Widget? style;
+  final int? maxLines;
+  final Function? onLaunchFail;
 
-  BuildContext ctx;
+  late BuildContext ctx;
 
   HtmlText({this.data, this.style, this.onLaunchFail, this.overflow, this.maxLines});
 
@@ -18,7 +18,7 @@ class HtmlText extends StatelessWidget {
     try {
       await cTab.launch(
         url,
-        option: new cTab.CustomTabsOption(
+        customTabsOption: new cTab.CustomTabsOption(
           toolbarColor: Theme.of(ctx).primaryColor,
           enableDefaultShare: true,
           enableUrlBarHiding: true,
@@ -38,15 +38,15 @@ class HtmlText extends StatelessWidget {
       print('Could not launch $url');
 
       if (this.onLaunchFail != null) {
-        this.onLaunchFail(url);
+        this.onLaunchFail!(url);
       }
     }
   }
 
-  TapGestureRecognizer recognizer(String url) {
+  TapGestureRecognizer recognizer(String? url) {
     return new TapGestureRecognizer()
       ..onTap = () {
-        if (url.startsWith("http://") || url.startsWith("https://")) {
+        if (url!.startsWith("http://") || url.startsWith("https://")) {
           _launchURL(url);
         } else {
           _launchOtherURL(url);
@@ -58,7 +58,7 @@ class HtmlText extends StatelessWidget {
   Widget build(BuildContext context) {
     ctx = context;
     HtmlParser parser = new HtmlParser(context);
-    List nodes = parser.parse(this.data);
+    List nodes = parser.parse(this.data!);
 
     TextSpan span = this._stackToTextSpan(nodes, context);
 
@@ -68,7 +68,7 @@ class HtmlText extends StatelessWidget {
       contents = new RichText(
         text: span,
         softWrap: true,
-        overflow: this.overflow,
+        overflow: this.overflow!,
         maxLines: this.maxLines,
       );
     } else {
@@ -123,11 +123,11 @@ class HtmlText extends StatelessWidget {
 
 class HtmlParser {
   // Regular Expressions for parsing tags and attributes
-  RegExp _startTag;
-  RegExp _endTag;
-  RegExp _attr;
-  RegExp _style;
-  RegExp _color;
+  late RegExp _startTag;
+  late RegExp _endTag;
+  late RegExp _attr;
+  late RegExp _style;
+  late RegExp _color;
 
   final BuildContext context;
 
@@ -260,7 +260,7 @@ class HtmlParser {
   List _stack = [];
   List _result = [];
 
-  Map<String, dynamic> _tag;
+  Map<String, dynamic>? _tag;
 
   HtmlParser(this.context) {
     this._startTag = new RegExp(
@@ -276,7 +276,7 @@ class HtmlParser {
 
   List parse(String html) {
     String last = html;
-    Match match;
+    Match? match;
     int index;
     bool chars;
 
@@ -300,7 +300,7 @@ class HtmlParser {
           match = this._endTag.firstMatch(html);
 
           if (match != null) {
-            String tag = match[0];
+            String tag = match[0]!;
 
             html = html.substring(tag.length);
             chars = false;
@@ -313,12 +313,12 @@ class HtmlParser {
           match = this._startTag.firstMatch(html);
 
           if (match != null) {
-            String tag = match[0];
+            String tag = match[0]!;
 
             html = html.substring(tag.length);
             chars = false;
 
-            this._parseStartTag(tag, match[1], match[2], match.start);
+            this._parseStartTag(tag, match[1]!, match[2]!, match.start);
           }
         }
 
@@ -333,10 +333,10 @@ class HtmlParser {
         }
       } else {
         RegExp re =
-            new RegExp(r'(.*)<\/' + this._getStackLastItem() + r'[^>]*>');
+            new RegExp(r'(.*)<\/' + this._getStackLastItem()! + r'[^>]*>');
 
         html = html.replaceAllMapped(re, (Match match) {
-          String text = match[0]
+          String? text = match[0]!
             ..replaceAll(new RegExp('<!--(.*?)-->'), '\$1')
             ..replaceAll(new RegExp('<!\[CDATA\[(.*?)]]>'), '\$1');
 
@@ -396,8 +396,8 @@ class HtmlParser {
 
     if (matches != null) {
       for (Match match in matches) {
-        String attribute = match[1];
-        String value;
+        String? attribute = match[1];
+        String? value;
 
         if (match[2] != null) {
           value = match[2];
@@ -416,7 +416,7 @@ class HtmlParser {
     this._appendTag(tagName, attrs);
   }
 
-  void _parseEndTag([String tagName]) {
+  void _parseEndTag([String? tagName]) {
     int pos;
 
     // If no tag name is provided, clean shop
@@ -438,19 +438,19 @@ class HtmlParser {
     }
   }
 
-  TextStyle _parseStyle(String tag, Map attrs) {
+  TextStyle _parseStyle(String? tag, Map attrs) {
     Iterable<Match> matches;
-    String style = attrs['style'];
+    String? style = attrs['style'];
     String param;
     String value;
 
     TextStyle defaultTextStyle = DefaultTextStyle.of(context).style;
 
-    double fontSize = defaultTextStyle.fontSize;
-    Color color = defaultTextStyle.color;
-    FontWeight fontWeight = defaultTextStyle.fontWeight;
-    FontStyle fontStyle = defaultTextStyle.fontStyle;
-    TextDecoration textDecoration = defaultTextStyle.decoration;
+    double? fontSize = defaultTextStyle.fontSize;
+    Color? color = defaultTextStyle.color;
+    FontWeight? fontWeight = defaultTextStyle.fontWeight;
+    FontStyle? fontStyle = defaultTextStyle.fontStyle;
+    TextDecoration? textDecoration = defaultTextStyle.decoration;
 
     switch (tag) {
       case 'h1':
@@ -495,8 +495,8 @@ class HtmlParser {
       matches = this._style.allMatches(style);
 
       for (Match match in matches) {
-        param = match[1].trim();
-        value = match[2].trim();
+        param = match[1]!.trim();
+        value = match[2]!.trim();
 
         switch (param) {
           case 'color':
@@ -559,24 +559,24 @@ class HtmlParser {
     this._tag = {'tag': tag, 'attrs': attrs};
   }
 
-  void _appendNode(String text) {
+  void _appendNode(String? text) {
     if (this._tag == null) {
       this._tag = {'tag': 'p', 'attrs': {}};
     }
 
-    this._tag['text'] = text;
-    this._tag['style'] = this._parseStyle(this._tag['tag'], this._tag['attrs']);
-    this._tag['href'] =
-        (this._tag['attrs']['href'] != null) ? this._tag['attrs']['href'] : '';
+    this._tag!['text'] = text;
+    this._tag!['style'] = this._parseStyle(this._tag!['tag'], this._tag!['attrs']);
+    this._tag!['href'] =
+        (this._tag!['attrs']['href'] != null) ? this._tag!['attrs']['href'] : '';
 
-    this._tag.remove('attrs');
+    this._tag!.remove('attrs');
 
     this._result.add(this._tag);
 
     this._tag = null;
   }
 
-  String _getStackLastItem() {
+  String? _getStackLastItem() {
     if (this._stack.length <= 0) {
       return null;
     }
